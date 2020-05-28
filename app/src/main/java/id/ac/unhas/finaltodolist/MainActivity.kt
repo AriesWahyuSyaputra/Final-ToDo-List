@@ -15,8 +15,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import id.ac.unhas.finaltodolist.adapter.ToDoAdapter
+import id.ac.unhas.finaltodolist.util.AlarmReceiver
 import id.ac.unhas.finaltodolist.util.Commons
 import id.ac.unhas.finaltodolist.util.FormDialog
+
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_todo.view.*
 
@@ -28,7 +30,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var todoViewModel: ToDoViewModel
     private lateinit var todoAdapter: ToDoAdapter
-
+    private lateinit var alarmReceiver: AlarmReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,6 +63,7 @@ class MainActivity : AppCompatActivity() {
         fab.setOnClickListener {
             showInsertDialog()
         }
+        alarmReceiver = AlarmReceiver()
     }
 
     override fun onResume() {
@@ -145,6 +148,9 @@ class MainActivity : AppCompatActivity() {
 
                 todoViewModel.insertTodo(todo)
 
+                if (remindMe) {
+                    alarmReceiver.setReminderAlarm(this, dueDate, time, "$title is due in 1 hour")
+                }
                 Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
             }
         }.show()
@@ -219,6 +225,10 @@ class MainActivity : AppCompatActivity() {
                 todo.remindMe = remindMe
 
                 todoViewModel.updateTodo(todo)
+
+                if (remindMe && prevDueTime != time) {
+                    alarmReceiver.setReminderAlarm(this, dueDate, time, "$title is due in 1 hour")
+                }
 
                 Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
             }
